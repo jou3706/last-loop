@@ -50,134 +50,134 @@ var _reloading := false
 var _recoil := Vector2.ZERO
 
 func _ready() -> void:
-	_base_cam_pos = camera.position
-	camera.fov = hip_fov
-	_current_mag = mag_size
-	_current_reserve = reserve_ammo
-	raycast.target_position = Vector3(0, 0, -range)
-	raycast.collision_mask = 1 | 4
-	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+    _base_cam_pos = camera.position
+    camera.fov = hip_fov
+    _current_mag = mag_size
+    _current_reserve = reserve_ammo
+    raycast.target_position = Vector3(0, 0, -range)
+    raycast.collision_mask = 1 | 4
+    Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-		var sens := ads_mouse_sensitivity if _ads_active else mouse_sensitivity
-		rotate_y(-event.relative.x * sens)
-		head.rotation.x = clampf(
-			head.rotation.x - event.relative.y * sens,
-			min_pitch,
-			max_pitch
-		)
-	if event.is_action_pressed("pause"):
-		if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-		else:
-			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-	if event.is_action_pressed("aim"):
-		_ads_active = true
-	if event.is_action_released("aim"):
-		_ads_active = false
-	if event.is_action_pressed("reload") and not _reloading and _current_mag < mag_size and _current_reserve > 0:
-		_start_reload()
+    if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+        var sens := ads_mouse_sensitivity if _ads_active else mouse_sensitivity
+        rotate_y(-event.relative.x * sens)
+        head.rotation.x = clampf(
+            head.rotation.x - event.relative.y * sens,
+            min_pitch,
+            max_pitch
+        )
+    if event.is_action_pressed("pause"):
+        if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+            Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+        else:
+            Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+    if event.is_action_pressed("aim"):
+        _ads_active = true
+    if event.is_action_released("aim"):
+        _ads_active = false
+    if event.is_action_pressed("reload") and not _reloading and _current_mag < mag_size and _current_reserve > 0:
+        _start_reload()
 
 func _physics_process(delta: float) -> void:
-	if is_on_floor():
-		if Input.is_action_just_pressed("jump"):
-			velocity.y = jump_velocity
-	else:
-		velocity.y -= gravity * delta
+    if is_on_floor():
+        if Input.is_action_just_pressed("jump"):
+            velocity.y = jump_velocity
+    else:
+        velocity.y -= gravity * delta
 
-	var base_speed := sprint_speed if Input.is_action_pressed("sprint") else walk_speed
-	var speed := ads_walk_speed if _ads_active else base_speed
-	var input_dir := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
-	var direction := (transform.basis * Vector3(input_dir.x, 0.0, input_dir.y)).normalized()
+    var base_speed := sprint_speed if Input.is_action_pressed("sprint") else walk_speed
+    var speed := ads_walk_speed if _ads_active else base_speed
+    var input_dir := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
+    var direction := (transform.basis * Vector3(input_dir.x, 0.0, input_dir.y)).normalized()
 
-	if direction:
-		velocity.x = direction.x * speed
-		velocity.z = direction.z * speed
-	else:
-		velocity.x = move_toward(velocity.x, 0.0, speed)
-		velocity.z = move_toward(velocity.z, 0.0, speed)
+    if direction:
+        velocity.x = direction.x * speed
+        velocity.z = direction.z * speed
+    else:
+        velocity.x = move_toward(velocity.x, 0.0, speed)
+        velocity.z = move_toward(velocity.z, 0.0, speed)
 
-	move_and_slide()
+    move_and_slide()
 
-	var target_fov := ads_fov if _ads_active else hip_fov
-	camera.fov = lerpf(camera.fov, target_fov, ads_transition_speed * delta)
+    var target_fov := ads_fov if _ads_active else hip_fov
+    camera.fov = lerpf(camera.fov, target_fov, ads_transition_speed * delta)
 
-	_update_bob(delta, input_dir, speed)
-	_update_recoil(delta)
+    _update_bob(delta, input_dir, speed)
+    _update_recoil(delta)
 
-	if Input.is_action_just_pressed("fire"):
-		_try_fire()
+    if Input.is_action_just_pressed("fire"):
+        _try_fire()
 
 func _try_fire() -> void:
-	if not _can_fire or _reloading:
-		return
-	if _current_mag <= 0:
-		return
-	_fire()
+    if not _can_fire or _reloading:
+        return
+    if _current_mag <= 0:
+        return
+    _fire()
 
 func _fire() -> void:
-	_current_mag -= 1
-	if raycast and raycast.is_colliding():
-		var _hit_pos = raycast.get_collision_point()
-		var _hit = raycast.get_collider()
+    _current_mag -= 1
+    if raycast and raycast.is_colliding():
+        var _hit_pos = raycast.get_collision_point()
+        var _hit = raycast.get_collider()
 
-	_recoil.y += recoil_pitch
-	_recoil.x += randf_range(-recoil_yaw, recoil_yaw)
-	head.rotation.x -= recoil_pitch * 0.01
-	head.rotation.y += randf_range(-recoil_yaw, recoil_yaw) * 0.01
+    _recoil.y += recoil_pitch
+    _recoil.x += randf_range(-recoil_yaw, recoil_yaw)
+    head.rotation.x -= recoil_pitch * 0.01
+    head.rotation.y += randf_range(-recoil_yaw, recoil_yaw) * 0.01
 
-	_can_fire = false
-	get_tree().create_timer(1.0 / max(fire_rate, 0.01), false).timeout.connect(_reset_fire, CONNECT_ONE_SHOT)
+    _can_fire = false
+    get_tree().create_timer(1.0 / max(fire_rate, 0.01), false).timeout.connect(_reset_fire, CONNECT_ONE_SHOT)
 
 func _reset_fire() -> void:
-	_can_fire = true
+    _can_fire = true
 
 func _start_reload() -> void:
-	if _reloading:
-		return
-	_reloading = true
-	get_tree().create_timer(reload_time, false).timeout.connect(_finish_reload, CONNECT_ONE_SHOT)
+    if _reloading:
+        return
+    _reloading = true
+    get_tree().create_timer(reload_time, false).timeout.connect(_finish_reload, CONNECT_ONE_SHOT)
 
 func _finish_reload() -> void:
-	var needed: int = mag_size - _current_mag
-	var take: int = min(needed, _current_reserve)
-	if take > 0:
-		_current_reserve -= take
-		_current_mag += take
-	_reloading = false
+    var needed: int = mag_size - _current_mag
+    var take: int = min(needed, _current_reserve)
+    if take > 0:
+        _current_reserve -= take
+        _current_mag += take
+    _reloading = false
 
 func _update_recoil(delta: float) -> void:
-	_recoil = _recoil.lerp(Vector2.ZERO, recoil_recovery * delta)
-	if abs(_recoil.y) > 0.0001 or abs(_recoil.x) > 0.0001:
-		head.rotation.x = clampf(head.rotation.x - _recoil.y * delta, min_pitch, max_pitch)
-		head.rotation.y += _recoil.x * delta
-		_recoil.y *= 0.9
-		_recoil.x *= 0.9
+    _recoil = _recoil.lerp(Vector2.ZERO, recoil_recovery * delta)
+    if abs(_recoil.y) > 0.0001 or abs(_recoil.x) > 0.0001:
+        head.rotation.x = clampf(head.rotation.x - _recoil.y * delta, min_pitch, max_pitch)
+        head.rotation.y += _recoil.x * delta
+        _recoil.y *= 0.9
+        _recoil.x *= 0.9
 
 func _update_bob(delta: float, input_dir: Vector2, speed: float) -> void:
-	if not bob_enabled or _ads_active:
-		_bob_time = 0.0
-		camera.position = camera.position.lerp(_base_cam_pos, 12.0 * delta)
-		return
-	var moving := is_on_floor() and input_dir != Vector2.ZERO
-	if moving:
-		_bob_time += delta * (speed / walk_speed)
-		var phase := _bob_time * TAU * bob_frequency
-		camera.position.y = lerpf(camera.position.y, _base_cam_pos.y + sin(phase) * bob_amplitude, 10.0 * delta)
-		camera.position.x = lerpf(camera.position.x, _base_cam_pos.x + cos(phase * 0.5) * bob_amplitude * 0.6, 10.0 * delta)
-	else:
-		_bob_time = 0.0
-		camera.position = camera.position.lerp(_base_cam_pos, 10.0 * delta)
+    if not bob_enabled or _ads_active:
+        _bob_time = 0.0
+        camera.position = camera.position.lerp(_base_cam_pos, 12.0 * delta)
+        return
+    var moving := is_on_floor() and input_dir != Vector2.ZERO
+    if moving:
+        _bob_time += delta * (speed / walk_speed)
+        var phase := _bob_time * TAU * bob_frequency
+        camera.position.y = lerpf(camera.position.y, _base_cam_pos.y + sin(phase) * bob_amplitude, 10.0 * delta)
+        camera.position.x = lerpf(camera.position.x, _base_cam_pos.x + cos(phase * 0.5) * bob_amplitude * 0.6, 10.0 * delta)
+    else:
+        _bob_time = 0.0
+        camera.position = camera.position.lerp(_base_cam_pos, 10.0 * delta)
 
 
 var health := 100
 
 func take_damage(amount: int) -> void:
-	health = max(0, health - amount)
+    health = max(0, health - amount)
 
 func get_health() -> int:
-	return health
+    return health
 
 func get_ammo() -> Dictionary:
-	return {"mag": _current_mag, "reserve": _current_reserve}
+    return {"mag": _current_mag, "reserve": _current_reserve}
