@@ -38,4 +38,4 @@ func _on_enemy_died() -> void:
 
 
 func get_wave() -> int:
-	return _wave
+    return _wave
