@@ -35,3 +35,7 @@ func _on_spawn() -> void:
 
 func _on_enemy_died() -> void:
   pass
+
+
+func get_wave() -> int:
+	return _wave

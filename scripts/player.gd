@@ -169,3 +169,15 @@ func _update_bob(delta: float, input_dir: Vector2, speed: float) -> void:
 	else:
 		_bob_time = 0.0
 		camera.position = camera.position.lerp(_base_cam_pos, 10.0 * delta)
+
+
+var health := 100
+
+func take_damage(amount: int) -> void:
+	health = max(0, health - amount)
+
+func get_health() -> int:
+	return health
+
+func get_ammo() -> Dictionary:
+	return {"mag": _current_mag, "reserve": _current_reserve}
