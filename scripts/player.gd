@@ -140,8 +140,8 @@ func _start_reload() -> void:
 	get_tree().create_timer(reload_time, false).timeout.connect(_finish_reload, CONNECT_ONE_SHOT)
 
 func _finish_reload() -> void:
-	var needed := mag_size - _current_mag
-	var take := min(needed, _current_reserve)
+	var needed: int = mag_size - _current_mag
+	var take: int = mini(needed, _current_reserve)
 	if take > 0:
 		_current_reserve -= take
 		_current_mag += take
