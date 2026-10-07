@@ -1,0 +1,9 @@
+[remap]
+importer="wavefront_obj"
+importer_version=1
+type="Material"
+uid="uid://auto_mtl"
+path="res://.godot/imported/pistol.mtl.material"
+[deps]
+source_file="res://assets/models/weapons/pistol.mtl"
+dest_files=["res://.godot/imported/pistol.mtl.material"]
