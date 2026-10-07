@@ -119,11 +119,8 @@ func _try_fire() -> void:
 func _fire() -> void:
 	_current_mag -= 1
 	if raycast and raycast.is_colliding():
-		var hit_pos = raycast.get_collision_point()
-		# Damage applied conceptually; no hitbox logic yet
+		var _hit_pos = raycast.get_collision_point()
 		var _hit = raycast.get_collider()
-		_ = hit_pos
-		_ = _hit
 
 	_recoil.y += recoil_pitch
 	_recoil.x += randf_range(-recoil_yaw, recoil_yaw)
