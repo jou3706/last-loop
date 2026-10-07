@@ -141,7 +141,7 @@ func _start_reload() -> void:
 
 func _finish_reload() -> void:
 	var needed: int = mag_size - _current_mag
-	var take: int = mini(needed, _current_reserve)
+	var take: int = min(needed, _current_reserve)
 	if take > 0:
 		_current_reserve -= take
 		_current_mag += take
