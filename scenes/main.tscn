@@ -29,12 +29,12 @@ size = Vector3(40, 1, 40)
 [sub_resource type="BoxShape3D" id="BoxShape3D_Crate"]
 size = Vector3(1, 0.6, 1)
 
+[sub_resource type="StandardMaterial3D" id="MatCrate_1"]
+albedo_color = Color(0.55, 0.42, 0.28, 1)
+
 [sub_resource type="BoxMesh" id="BoxMesh_Crate"]
 material = SubResource("MatCrate_1")
 size = Vector3(1, 0.6, 1)
-
-[sub_resource type="StandardMaterial3D" id="MatCrate_1"]
-albedo_color = Color(0.55, 0.42, 0.28, 1)
 
 [node name="Main" type="Node3D"]
 
