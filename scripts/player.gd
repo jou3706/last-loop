@@ -23,6 +23,11 @@ extends CharacterBody3D
 @export var hip_fov := 90.0
 @export var ads_transition_speed := 14.0
 
+@export_category("Crouch")
+@export var crouch_speed := 1.8
+@export var crouch_height := 1.0
+@export var crouch_transition_speed := 10.0
+
 @export_category("Weapon")
 @export var fire_rate := 8.0  # RPS
 @export var damage := 24
@@ -40,12 +45,15 @@ extends CharacterBody3D
 @onready var raycast: RayCast3D = $Head/Camera3D/RayCast3D
 @onready var muzzle_flash: GPUParticles3D = $Head/Camera3D/WeaponHolder/MuzzleFlash
 @onready var muzzle_light: OmniLight3D = $Head/Camera3D/WeaponHolder/MuzzleLight
+@onready var collision_shape: CollisionShape3D = $CollisionShape3D
 
 const ImpactScene := preload("res://scenes/fx/impact.tscn")
 
 var _bob_time := 0.0
 var _base_cam_pos := Vector3.ZERO
+var _base_head_pos := Vector3.ZERO
 var _ads_active := false
+var _crouching := false
 
 var _current_mag := 0
 var _current_reserve := 0
@@ -55,6 +63,7 @@ var _recoil := Vector2.ZERO
 
 func _ready() -> void:
 	_base_cam_pos = camera.position
+	_base_head_pos = head.position
 	camera.fov = hip_fov
 	_current_mag = mag_size
 	_current_reserve = reserve_ammo
@@ -89,14 +98,15 @@ func _unhandled_input(event: InputEvent) -> void:
 		_start_reload()
 
 func _physics_process(delta: float) -> void:
+	_update_crouch(delta)
 	if is_on_floor():
 		if Input.is_action_just_pressed("jump"):
 			velocity.y = jump_velocity
 	else:
 		velocity.y -= gravity * delta
 
-	var base_speed := sprint_speed if Input.is_action_pressed("sprint") else walk_speed
-	var speed := ads_walk_speed if _ads_active else base_speed
+	var base_speed := sprint_speed if Input.is_action_pressed("sprint") and not _crouching else walk_speed
+	var speed := crouch_speed if _crouching else (ads_walk_speed if _ads_active else base_speed)
 	var input_dir := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
 	var direction := (transform.basis * Vector3(input_dir.x, 0.0, input_dir.y)).normalized()
 
@@ -121,9 +131,11 @@ func _physics_process(delta: float) -> void:
 func _try_fire() -> void:
 	if Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
 		return
-	if not _can_fire or _reloading:
-		return
 	if _current_mag <= 0:
+		if _current_reserve > 0 and not _reloading:
+			_start_reload()
+		return
+	if not _can_fire or _reloading:
 		return
 	_fire()
 
@@ -147,6 +159,17 @@ func _fire() -> void:
 
 	_can_fire = false
 	get_tree().create_timer(1.0 / max(fire_rate, 0.01), false).timeout.connect(_reset_fire, CONNECT_ONE_SHOT)
+
+func _update_crouch(delta: float) -> void:
+	_crouching = Input.is_action_pressed("crouch") and is_on_floor()
+	var ratio := crouch_height / 1.8
+	var target_head_y := _base_head_pos.y * ratio if _crouching else _base_head_pos.y
+	head.position.y = lerpf(head.position.y, target_head_y, crouch_transition_speed * delta)
+	var shape := collision_shape.shape as CapsuleShape3D
+	if shape:
+		var target_height := crouch_height if _crouching else 1.8
+		shape.height = lerpf(shape.height, target_height, crouch_transition_speed * delta)
+		collision_shape.position.y = lerpf(collision_shape.position.y, target_height * 0.5, crouch_transition_speed * delta)
 
 func _reset_fire() -> void:
 	_can_fire = true
@@ -213,7 +236,7 @@ func _update_recoil(delta: float) -> void:
 		_recoil.x *= 0.9
 
 func _update_bob(delta: float, input_dir: Vector2, speed: float) -> void:
-	if not bob_enabled or _ads_active:
+	if not bob_enabled or _ads_active or _crouching:
 		_bob_time = 0.0
 		camera.position = camera.position.lerp(_base_cam_pos, 12.0 * delta)
 		return
