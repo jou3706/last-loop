@@ -1,6 +1,7 @@
 [gd_scene format=4]
 
 [ext_resource type="Script" path="res://scripts/player_animated.gd" id="1_okebs"]
+[ext_resource type="ArrayMesh" path="res://assets/models/weapons/rifle.obj" id="2_7fmbd"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_7fmbd"]
 radius = 0.4
@@ -15845,6 +15846,81 @@ _data = {
 &"Walking_To_Dying": SubResource("Animation_enlcf")
 }
 
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_k6786"]
+animation = &"Rifle_Aiming_Idle"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_c5af2"]
+animation = &"Rifle_Walk"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_qo7y0"]
+animation = &"Strafing"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_yt7td"]
+animation = &"Strafing"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_qadsi"]
+animation = &"Backwards_Rifle_Walk"
+
+[sub_resource type="AnimationNodeBlendSpace2D" id="AnimationNodeBlendSpace2D_estlj"]
+min_space = Vector2(-180, 0)
+max_space = Vector2(180, 600)
+blend_point_0/node = SubResource("AnimationNodeAnimation_k6786")
+blend_point_0/pos = Vector2(0, 0)
+blend_point_0/name = &"AimIdle"
+blend_point_1/node = SubResource("AnimationNodeAnimation_c5af2")
+blend_point_1/pos = Vector2(0, 400)
+blend_point_1/name = &"AimWalk"
+blend_point_2/node = SubResource("AnimationNodeAnimation_qo7y0")
+blend_point_2/pos = Vector2(-90, 400)
+blend_point_2/name = &"AimStrafeL"
+blend_point_3/node = SubResource("AnimationNodeAnimation_yt7td")
+blend_point_3/pos = Vector2(90, 400)
+blend_point_3/name = &"AimStrafeR"
+blend_point_4/node = SubResource("AnimationNodeAnimation_qadsi")
+blend_point_4/pos = Vector2(180, 400)
+blend_point_4/name = &"AimBack"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_bogad"]
+animation = &"Idle_Crouching"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_kngrt"]
+animation = &"Walk_Crouching_Left"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_wutx8"]
+animation = &"Walk_Crouching_Right"
+
+[sub_resource type="AnimationNodeBlendSpace2D" id="AnimationNodeBlendSpace2D_jlkdn"]
+min_space = Vector2(-180, 0)
+max_space = Vector2(180, 600)
+blend_point_0/node = SubResource("AnimationNodeAnimation_bogad")
+blend_point_0/pos = Vector2(0, 0)
+blend_point_0/name = &"CrouchIdle"
+blend_point_1/node = SubResource("AnimationNodeAnimation_kngrt")
+blend_point_1/pos = Vector2(-45, 400)
+blend_point_1/name = &"CrouchWalkL"
+blend_point_2/node = SubResource("AnimationNodeAnimation_wutx8")
+blend_point_2/pos = Vector2(45, 400)
+blend_point_2/name = &"CrouchWalkR"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_obw40"]
+animation = &"Firing_Rifle"
+
+[sub_resource type="AnimationNodeOutput" id="AnimationNodeOutput_ll6xx"]
+
+[sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_gcv36"]
+fadein_time = 0.02
+fadeout_time = 0.12
+break_loop_at_end = true
+
+[sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_3eam3"]
+nodes/Output/node = SubResource("AnimationNodeOutput_ll6xx")
+nodes/Output/position = Vector2(0, 0)
+nodes/Shot/node = SubResource("AnimationNodeOneShot_gcv36")
+nodes/Shot/position = Vector2(0, 0)
+nodes/Clip/node = SubResource("AnimationNodeAnimation_obw40")
+nodes/Clip/position = Vector2(0, 0)
+node_connections = [&"Output", 0, &"Shot", &"Shot", 1, &"Clip"]
+
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_xtqar"]
 animation = &"Rifle_Idle"
 
@@ -15905,6 +15981,25 @@ blend_point_8/node = SubResource("AnimationNodeAnimation_h8l2l")
 blend_point_8/pos = Vector2(180, 600)
 blend_point_8/name = &"Run_Backwards"
 
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_8mfmw"]
+animation = &"Reloading"
+
+[sub_resource type="AnimationNodeOutput" id="AnimationNodeOutput_3ftiy"]
+
+[sub_resource type="AnimationNodeOneShot" id="AnimationNodeOneShot_bwomf"]
+fadein_time = 0.02
+fadeout_time = 0.12
+break_loop_at_end = true
+
+[sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_7sswa"]
+nodes/Output/node = SubResource("AnimationNodeOutput_3ftiy")
+nodes/Output/position = Vector2(0, 0)
+nodes/Shot/node = SubResource("AnimationNodeOneShot_bwomf")
+nodes/Shot/position = Vector2(0, 0)
+nodes/Clip/node = SubResource("AnimationNodeAnimation_8mfmw")
+nodes/Clip/position = Vector2(0, 0)
+node_connections = [&"Output", 0, &"Shot", &"Shot", 1, &"Clip"]
+
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_mw0vt"]
 animation = &"Rifle_Jump"
 
@@ -15919,12 +16014,84 @@ advance_mode = 2
 [sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_okebs"]
 advance_mode = 2
 
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_hx5p1"]
+xfade_time = 0.25
+advance_mode = 0
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_m1ybh"]
+xfade_time = 0.25
+advance_mode = 0
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_pnmxa"]
+xfade_time = 0.2
+advance_mode = 0
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_t1wjy"]
+xfade_time = 0.2
+advance_mode = 0
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_r6wn1"]
+xfade_time = 0.2
+advance_mode = 0
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_oe21m"]
+xfade_time = 0.2
+advance_mode = 0
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_84dql"]
+xfade_time = 0.05
+advance_mode = 0
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_xppbs"]
+xfade_time = 0.05
+advance_mode = 0
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_idf2x"]
+xfade_time = 0.05
+advance_mode = 0
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_aels0"]
+xfade_time = 0.1
+advance_mode = 0
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_1hkje"]
+xfade_time = 0.3
+advance_mode = 0
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_g00g1"]
+xfade_time = 0.3
+advance_mode = 0
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_hkh8f"]
+xfade_time = 0.3
+advance_mode = 0
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_dhhj2"]
+xfade_time = 0.2
+advance_mode = 0
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_myjfa"]
+xfade_time = 0.2
+advance_mode = 0
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="AnimationNodeStateMachineTransition_l8lb0"]
+xfade_time = 0.2
+advance_mode = 0
+
 [sub_resource type="AnimationNodeStateMachine" id="AnimationNodeStateMachine_qadsi"]
+states/Aiming/node = SubResource("AnimationNodeBlendSpace2D_estlj")
+states/Aiming/position = Vector2(0, 0)
+states/Crouching/node = SubResource("AnimationNodeBlendSpace2D_jlkdn")
+states/Crouching/position = Vector2(0, 0)
+states/Fire/node = SubResource("AnimationNodeBlendTree_3eam3")
+states/Fire/position = Vector2(0, 0)
 states/Locomotion/node = SubResource("AnimationNodeBlendSpace2D_c5af2")
 states/Locomotion/position = Vector2(0, 0)
+states/Reload/node = SubResource("AnimationNodeBlendTree_7sswa")
+states/Reload/position = Vector2(0, 0)
 states/Rifle_Jump/node = SubResource("AnimationNodeAnimation_mw0vt")
 states/Rifle_Jump/position = Vector2(0, 0)
-transitions = ["Locomotion", "Rifle_Jump", SubResource("AnimationNodeStateMachineTransition_qo7y0"), "Rifle_Jump", "Locomotion", SubResource("AnimationNodeStateMachineTransition_yt7td"), "Start", "Locomotion", SubResource("AnimationNodeStateMachineTransition_okebs")]
+transitions = ["Locomotion", "Rifle_Jump", SubResource("AnimationNodeStateMachineTransition_qo7y0"), "Rifle_Jump", "Locomotion", SubResource("AnimationNodeStateMachineTransition_yt7td"), "Start", "Locomotion", SubResource("AnimationNodeStateMachineTransition_okebs"), "Locomotion", "Aiming", SubResource("AnimationNodeStateMachineTransition_hx5p1"), "Aiming", "Locomotion", SubResource("AnimationNodeStateMachineTransition_m1ybh"), "Locomotion", "Crouching", SubResource("AnimationNodeStateMachineTransition_pnmxa"), "Crouching", "Locomotion", SubResource("AnimationNodeStateMachineTransition_t1wjy"), "Aiming", "Crouching", SubResource("AnimationNodeStateMachineTransition_r6wn1"), "Crouching", "Aiming", SubResource("AnimationNodeStateMachineTransition_oe21m"), "Locomotion", "Fire", SubResource("AnimationNodeStateMachineTransition_84dql"), "Aiming", "Fire", SubResource("AnimationNodeStateMachineTransition_xppbs"), "Crouching", "Fire", SubResource("AnimationNodeStateMachineTransition_idf2x"), "Fire", "Locomotion", SubResource("AnimationNodeStateMachineTransition_aels0"), "Locomotion", "Reload", SubResource("AnimationNodeStateMachineTransition_1hkje"), "Aiming", "Reload", SubResource("AnimationNodeStateMachineTransition_g00g1"), "Crouching", "Reload", SubResource("AnimationNodeStateMachineTransition_hkh8f"), "Reload", "Locomotion", SubResource("AnimationNodeStateMachineTransition_dhhj2"), "Aiming", "Rifle_Jump", SubResource("AnimationNodeStateMachineTransition_myjfa"), "Crouching", "Rifle_Jump", SubResource("AnimationNodeStateMachineTransition_l8lb0")]
 
 [node name="Player" type="CharacterBody3D" unique_id=88838857]
 script = ExtResource("1_okebs")
@@ -16399,19 +16566,33 @@ visible = false
 mesh = SubResource("ArrayMesh_waa17")
 skin = SubResource("Skin_y4ypw")
 
+[node name="RifleAttach" type="BoneAttachment3D" parent="Skeleton3D" unique_id=1656153206]
+bone_name = "mixamorig_RightHand"
+
+[node name="RifleMesh" type="MeshInstance3D" parent="Skeleton3D/RifleAttach" unique_id=2016470765]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.02, 0.05, -0.1)
+mesh = ExtResource("2_7fmbd")
+
 [node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=154431840]
 libraries/ = SubResource("AnimationLibrary_k6786")
 
 [node name="AnimationTree" type="AnimationTree" parent="." unique_id=407631565]
 tree_root = SubResource("AnimationNodeStateMachine_qadsi")
 anim_player = NodePath("AnimationPlayer")
+parameters/Aiming/blend_position = Vector2(0, 0)
+parameters/Crouching/blend_position = Vector2(0, 0)
+parameters/Fire/Shot/active = false
+parameters/Fire/Shot/internal_active = false
+parameters/Fire/Shot/request = 0
 parameters/Locomotion/blend_position = Vector2(0, 0)
+parameters/Reload/Shot/active = false
+parameters/Reload/Shot/internal_active = false
+parameters/Reload/Shot/request = 0
 
-[node name="SpringArm3D" type="SpringArm3D" parent="."]
+[node name="SpringArm3D" type="SpringArm3D" parent="." unique_id=361618113]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
 spring_length = 4.0
-collision_mask = 1
 
-[node name="Camera3D" type="Camera3D" parent="SpringArm3D"]
+[node name="Camera3D" type="Camera3D" parent="SpringArm3D" unique_id=2068305917]
 current = true
 near = 0.1
