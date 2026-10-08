@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://b3l03l81td5g2"]
 
-[ext_resource type="PackedScene" path="res://scenes/player.tscn" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/player_animated.tscn" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/game_manager.tscn" id="game_mgr"]
 [ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="hud"]
 [ext_resource type="PackedScene" path="res://scenes/target.tscn" id="target"]

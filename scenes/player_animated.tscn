@@ -16406,3 +16406,12 @@ libraries/ = SubResource("AnimationLibrary_k6786")
 tree_root = SubResource("AnimationNodeStateMachine_qadsi")
 anim_player = NodePath("AnimationPlayer")
 parameters/Locomotion/blend_position = Vector2(0, 0)
+
+[node name="SpringArm3D" type="SpringArm3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+spring_length = 4.0
+collision_mask = 1
+
+[node name="Camera3D" type="Camera3D" parent="SpringArm3D"]
+current = true
+near = 0.1
