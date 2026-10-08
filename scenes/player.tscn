@@ -1,4 +1,4 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/player.gd" id="1"]
 [ext_resource type="ArrayMesh" path="res://assets/models/weapons/rifle.obj" id="2"]
@@ -6,6 +6,11 @@
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
 radius = 0.35
 height = 1.8
+
+[sub_resource type="StandardMaterial3D" id="MatWeapon"]
+albedo_color = Color(0.18, 0.19, 0.22, 1)
+metallic = 0.6
+roughness = 0.4
 
 [node name="Player" type="CharacterBody3D"]
 collision_layer = 2
@@ -20,12 +25,13 @@ shape = SubResource("CapsuleShape3D_1")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
 
 [node name="Camera3D" type="Camera3D" parent="Head"]
+near = 0.05
 
 [node name="WeaponHolder" type="Node3D" parent="Head/Camera3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.22, -0.16, -0.4)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, -0.16, -0.55)
 
 [node name="WeaponMesh" type="MeshInstance3D" parent="Head/Camera3D/WeaponHolder"]
-transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 0, -0.01, -0.05)
+material_override = SubResource("MatWeapon")
 mesh = ExtResource("2")
 
 [node name="RayCast3D" type="RayCast3D" parent="Head/Camera3D"]

@@ -62,12 +62,8 @@ func _unhandled_input(event: InputEvent) -> void:
     if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
         var sens := ads_mouse_sensitivity if _ads_active else mouse_sensitivity
         rotate_y(-event.relative.x * sens)
-        head.rotation.x = clampf(
-            head.rotation.x - event.relative.y * sens,
-            min_pitch,
-            max_pitch
-        )
-    if event.is_action_pressed("pause"):
+        head.rotation.x = clampf(head.rotation.x - event.relative.y * sens, min_pitch, max_pitch)
+    if event.is_action_pressed("pause") or event.is_action_pressed("ui_cancel"):
         if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
             Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
         else:
@@ -106,7 +102,7 @@ func _physics_process(delta: float) -> void:
     _update_bob(delta, input_dir, speed)
     _update_recoil(delta)
 
-    if Input.is_action_just_pressed("fire"):
+    if Input.is_action_pressed("fire"):
         _try_fire()
 
 func _try_fire() -> void:
