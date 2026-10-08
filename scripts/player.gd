@@ -7,6 +7,11 @@ extends CharacterBody3D
 @export var jump_velocity := 4.5
 @export var gravity := 9.8
 
+@export_category("Health")
+@export var max_health := 100
+@export var respawn_delay := 2.0
+@export var respawn_iframes := 1.5
+
 @export_category("Look")
 @export var mouse_sensitivity := 0.0022
 @export var ads_mouse_sensitivity := 0.0014
@@ -72,6 +77,10 @@ var _current_reserve := 0
 var _can_fire := true
 var _reloading := false
 var _recoil := Vector2.ZERO
+var _dead := false
+var _iframes_left := 0.0
+var _start_global := Vector3.ZERO
+var _respawn_timer: Timer
 
 func _ready() -> void:
 	_base_cam_pos = camera.position
@@ -80,6 +89,12 @@ func _ready() -> void:
 	_fov_target = hip_fov
 	_current_mag = mag_size
 	_current_reserve = reserve_ammo
+	_start_global = global_position
+	health = max_health
+	_respawn_timer = Timer.new()
+	_respawn_timer.one_shot = true
+	add_child(_respawn_timer)
+	_respawn_timer.timeout.connect(_respawn)
 	_align_muzzle_ray()
 	raycast.collision_mask = 1 | 4
 	_ensure_input_actions()
@@ -135,6 +150,16 @@ func _unhandled_input(event: InputEvent) -> void:
 		_start_reload()
 
 func _physics_process(delta: float) -> void:
+	_iframes_left = maxf(_iframes_left - delta, 0.0)
+	if _dead:
+		if not is_on_floor():
+			velocity.y -= gravity * delta
+		else:
+			velocity.x = 0.0
+			velocity.z = 0.0
+			velocity.y = 0.0
+		move_and_slide()
+		return
 	_update_crouch()
 	if is_on_floor():
 		if Input.is_action_just_pressed("jump"):
@@ -328,10 +353,34 @@ func _update_bob(delta: float, input_dir: Vector2, speed: float, sprinting: bool
 		camera.position = camera.position.lerp(_base_cam_pos, 10.0 * delta)
 
 
-var health := 100
+var health: int
 
 func take_damage(amount: int) -> void:
+	if _dead or _iframes_left > 0.0:
+		return
 	health = max(0, health - amount)
+	if health <= 0:
+		_die()
+
+func is_dead() -> bool:
+	return _dead
+
+func _die() -> void:
+	if _dead:
+		return
+	_dead = true
+	print("[player] died")
+	_respawn_timer.start(respawn_delay)
+
+func _respawn() -> void:
+	global_position = _start_global
+	velocity = Vector3.ZERO
+	rotation = Vector3.ZERO
+	head.rotation.x = 0.0
+	health = max_health
+	_dead = false
+	_iframes_left = respawn_iframes
+	print("[player] respawned")
 
 func get_health() -> int:
 	return health

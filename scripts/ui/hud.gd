@@ -3,6 +3,7 @@ extends CanvasLayer
 @onready var ammo_label: Label = $Control/Ammo
 @onready var health_label: Label = $Control/Health
 @onready var wave_label: Label = $Control/Wave
+@onready var status_label: Label = $Control/Status
 
 var _player: Node = null
 var _gm: Node = null
@@ -24,3 +25,7 @@ func _process(_delta: float) -> void:
       health_label.text = "HP: %d" % _player.get_health()
   if _gm != null and _gm.has_method("get_wave"):
     wave_label.text = "Wave: %d" % _gm.get_wave()
+  if _player != null and _player.has_method("is_dead") and _player.is_dead():
+    status_label.visible = true
+  else:
+    status_label.visible = false
