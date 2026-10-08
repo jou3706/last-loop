@@ -1,0 +1,119 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1"]
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.07, 0.09, 0.13, 1)
+
+[node name="Title" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -400.0
+offset_top = 90.0
+offset_right = 400.0
+offset_bottom = 180.0
+grow_horizontal = 2
+horizontal_alignment = 1
+text = "THE LAST LOOP"
+font_size = 72
+
+[node name="Subtitle" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -300.0
+offset_top = 180.0
+offset_right = 300.0
+offset_bottom = 220.0
+grow_horizontal = 2
+horizontal_alignment = 1
+text = "Time-loop competitive FPS — Campaign"
+font_size = 20
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150.0
+offset_top = -120.0
+offset_right = 150.0
+offset_bottom = 120.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MainBox" type="VBoxContainer" parent="CenterContainer"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="StartButton" type="Button" parent="CenterContainer/MainBox"]
+custom_minimum_size = Vector2(260, 52)
+layout_mode = 2
+text = "Start Campaign"
+
+[node name="SelectLevelButton" type="Button" parent="CenterContainer/MainBox"]
+custom_minimum_size = Vector2(260, 52)
+layout_mode = 2
+text = "Select Level"
+
+[node name="QuitButton" type="Button" parent="CenterContainer/MainBox"]
+custom_minimum_size = Vector2(260, 52)
+layout_mode = 2
+text = "Quit"
+
+[node name="LevelSelect" type="VBoxContainer" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150.0
+offset_top = -110.0
+offset_right = 150.0
+offset_bottom = 110.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 16
+
+[node name="LevelSelectTitle" type="Label" parent="LevelSelect"]
+layout_mode = 2
+horizontal_alignment = 1
+text = "Select Level"
+font_size = 28
+
+[node name="Level1Button" type="Button" parent="LevelSelect"]
+custom_minimum_size = Vector2(260, 48)
+layout_mode = 2
+text = "Level 1 — Shooting Range"
+
+[node name="Level2Button" type="Button" parent="LevelSelect"]
+custom_minimum_size = Vector2(260, 48)
+layout_mode = 2
+text = "Level 2 — Inner Courtyard"
+
+[node name="BackButton" type="Button" parent="LevelSelect"]
+custom_minimum_size = Vector2(260, 40)
+layout_mode = 2
+text = "Back"

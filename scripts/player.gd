@@ -81,6 +81,7 @@ var _dead := false
 var _iframes_left := 0.0
 var _start_global := Vector3.ZERO
 var _respawn_timer: Timer
+var _last_bob_sin := 0.0
 
 func _ready() -> void:
 	_base_cam_pos = camera.position
@@ -228,6 +229,7 @@ func _fire() -> void:
 
 	_can_fire = false
 	get_tree().create_timer(1.0 / max(fire_rate, 0.01), false).timeout.connect(_reset_fire, CONNECT_ONE_SHOT)
+	AudioManager.play_gunshot()
 
 func _can_stand() -> bool:
 	var space := get_world_3d().direct_space_state
@@ -318,6 +320,7 @@ func _start_reload() -> void:
 	if _reloading:
 		return
 	_reloading = true
+	AudioManager.play_reload()
 	get_tree().create_timer(reload_time, false).timeout.connect(_finish_reload, CONNECT_ONE_SHOT)
 
 func _finish_reload() -> void:
@@ -348,8 +351,13 @@ func _update_bob(delta: float, input_dir: Vector2, speed: float, sprinting: bool
 		var phase := _bob_time * TAU * freq
 		camera.position.y = lerpf(camera.position.y, _base_cam_pos.y + sin(phase) * bob_amplitude, 10.0 * delta)
 		camera.position.x = lerpf(camera.position.x, _base_cam_pos.x + cos(phase * 0.5) * bob_amplitude * 0.6, 10.0 * delta)
+		var bob_sin := sin(phase)
+		if _last_bob_sin >= 0.0 and bob_sin < 0.0:
+			AudioManager.play_footstep()
+		_last_bob_sin = bob_sin
 	else:
 		_bob_time = 0.0
+		_last_bob_sin = 0.0
 		camera.position = camera.position.lerp(_base_cam_pos, 10.0 * delta)
 
 

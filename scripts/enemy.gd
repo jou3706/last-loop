@@ -100,6 +100,7 @@ func _has_line_of_sight() -> bool:
 
 func _fire() -> void:
 	_shot_cooldown = 1.0 / max(fire_rate, 0.01)
+	AudioManager.play_enemy_shot()
 	var origin := muzzle.global_position
 	eyes.force_raycast_update()
 	var end := origin + (muzzle.global_transform.basis * Vector3.BACK * 200.0)
