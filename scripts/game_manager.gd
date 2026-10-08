@@ -30,12 +30,12 @@ func _on_spawn() -> void:
   e.died.connect(_on_enemy_died)
   _enemies_left -= 1
   if _enemies_left <= 0:
-    _wave += 1
-    _spawn_wave()
+   _wave += 1
+   _spawn_wave()
 
 func _on_enemy_died() -> void:
   pass
 
 
 func get_wave() -> int:
-    return _wave
+  return _wave
