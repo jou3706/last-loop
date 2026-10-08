@@ -136,7 +136,7 @@ func _fire() -> void:
 		var col := raycast.get_collider()
 		if col and col.has_method("take_damage"):
 			col.take_damage(damage)
-		_spawn_impact(end, raycast.get_collision_normal())
+		_spawn_impact(col, end, raycast.get_collision_normal())
 	_spawn_trail(start, end)
 	_flash_muzzle()
 
@@ -181,10 +181,13 @@ func _spawn_trail(from: Vector3, to: Vector3) -> void:
 	tw.tween_property(mat, "albedo_color:a", 0.0, 0.08)
 	tw.tween_callback(beam.queue_free)
 
-func _spawn_impact(pos: Vector3, normal: Vector3) -> void:
+func _spawn_impact(parent_node: Node, hit_pos: Vector3, normal: Vector3) -> void:
 	var fx := ImpactScene.instantiate()
-	get_tree().current_scene.add_child(fx)
-	fx.global_position = pos
+	var parent: Node = get_tree().current_scene
+	if parent_node is Node3D and (parent_node as Node).is_inside_tree():
+		parent = parent_node
+	parent.add_child(fx)
+	fx.global_position = hit_pos
 	fx.setup(normal)
 
 func _start_reload() -> void:
