@@ -2,7 +2,7 @@ extends CharacterBody3D
 
 @export_category("Movement")
 @export var walk_speed := 3.5
-@export var sprint_speed := 5.5
+@export var sprint_speed := 7.0
 @export var ads_walk_speed := 2.2
 @export var jump_velocity := 4.5
 @export var gravity := 9.8
