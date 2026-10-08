@@ -2,7 +2,7 @@ extends CharacterBody3D
 
 @export_category("Movement")
 @export var walk_speed := 3.5
-@export var sprint_speed := 7.0
+@export var sprint_speed := 8.0
 @export var ads_walk_speed := 2.2
 @export var jump_velocity := 4.5
 @export var gravity := 9.8
@@ -17,19 +17,19 @@ extends CharacterBody3D
 @export var bob_enabled := true
 @export var bob_amplitude := 0.04
 @export var bob_frequency := 1.8
+@export var sprint_bob_multiplier := 1.6
 
-@export_category("ADS")
+@export_category("FOV")
+@export var hip_fov := 75.0
 @export var ads_fov := 50.0
-@export var hip_fov := 90.0
-@export var ads_transition_speed := 14.0
+@export var sprint_fov := 90.0
+@export var fov_transition_time := 0.25
 
 @export_category("Crouch")
-@export var crouch_speed := 1.8
-@export var crouch_height := 1.0
-@export var crouch_transition_speed := 10.0
-
-@export_category("Sprint FOV")
-@export var sprint_fov := 100.0
+@export var crouch_speed := 2.0
+@export var crouch_height := 0.9
+@export var crouch_camera_height := 0.8
+@export var crouch_transition_time := 0.18
 
 @export_category("Weapon")
 @export var fire_rate := 8.0  # RPS
@@ -59,6 +59,11 @@ var _base_cam_pos := Vector3.ZERO
 var _base_head_pos := Vector3.ZERO
 var _ads_active := false
 var _crouching := false
+var _was_sprinting := false
+var _was_crouching := false
+var _fov_target := 0.0
+var _fov_tween: Tween
+var _crouch_tween: Tween
 
 var _current_mag := 0
 var _current_reserve := 0
@@ -70,6 +75,7 @@ func _ready() -> void:
 	_base_cam_pos = camera.position
 	_base_head_pos = head.position
 	camera.fov = hip_fov
+	_fov_target = hip_fov
 	_current_mag = mag_size
 	_current_reserve = reserve_ammo
 	_align_muzzle_ray()
@@ -107,7 +113,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		_start_reload()
 
 func _physics_process(delta: float) -> void:
-	_update_crouch(delta)
+	_update_crouch()
 	if is_on_floor():
 		if Input.is_action_just_pressed("jump"):
 			velocity.y = jump_velocity
@@ -129,11 +135,17 @@ func _physics_process(delta: float) -> void:
 
 	move_and_slide()
 
-	var target_fov := ads_fov if _ads_active else (sprint_fov if sprinting else hip_fov)
-	camera.fov = lerpf(camera.fov, target_fov, ads_transition_speed * delta)
+	_set_fov_target(ads_fov if _ads_active else (sprint_fov if sprinting else hip_fov))
 
-	_update_bob(delta, input_dir, speed)
+	_update_bob(delta, input_dir, speed, sprinting)
 	_update_recoil(delta)
+
+	if sprinting != _was_sprinting:
+		print("Sprinting: ", sprinting)
+		_was_sprinting = sprinting
+	if _crouching != _was_crouching:
+		print("Crouching: ", _crouching)
+		_was_crouching = _crouching
 
 	if Input.is_action_pressed("fire"):
 		_try_fire()
@@ -175,19 +187,43 @@ func _can_stand() -> bool:
 	var q := PhysicsRayQueryParameters3D.create(head.global_position, head.global_position + Vector3.UP * 1.2, 1)
 	return space.intersect_ray(q).is_empty()
 
-func _update_crouch(delta: float) -> void:
+func _set_fov_target(target: float) -> void:
+	if target == _fov_target:
+		return
+	_fov_target = target
+	if _fov_tween and _fov_tween.is_valid():
+		_fov_tween.kill()
+	_fov_tween = create_tween()
+	_fov_tween.set_trans(Tween.TRANS_QUART)
+	_fov_tween.set_ease(Tween.EASE_OUT)
+	_fov_tween.tween_property(camera, "fov", target, fov_transition_time)
+
+func _update_crouch() -> void:
 	var want_crouch := Input.is_action_pressed("crouch")
 	if not want_crouch and not _can_stand():
 		want_crouch = true
-	_crouching = want_crouch and is_on_floor()
-	var ratio := crouch_height / 1.8
-	var target_head_y := _base_head_pos.y * ratio if _crouching else _base_head_pos.y
-	head.position.y = lerpf(head.position.y, target_head_y, crouch_transition_speed * delta)
+	var new_crouch := want_crouch and is_on_floor()
+	if new_crouch != _crouching:
+		_crouching = new_crouch
+		_animate_crouch()
+
+func _animate_crouch() -> void:
+	if _crouch_tween and _crouch_tween.is_valid():
+		_crouch_tween.kill()
+	_crouch_tween = create_tween()
+	_crouch_tween.set_trans(Tween.TRANS_QUART)
+	_crouch_tween.set_ease(Tween.EASE_OUT)
 	var shape := collision_shape.shape as CapsuleShape3D
-	if shape:
-		var target_height := crouch_height if _crouching else 1.8
-		shape.height = lerpf(shape.height, target_height, crouch_transition_speed * delta)
-		collision_shape.position.y = lerpf(collision_shape.position.y, target_height * 0.5, crouch_transition_speed * delta)
+	if _crouching:
+		_crouch_tween.tween_property(head, "position:y", crouch_camera_height, crouch_transition_time)
+		if shape:
+			_crouch_tween.parallel().tween_property(shape, "height", crouch_height, crouch_transition_time)
+			_crouch_tween.parallel().tween_property(collision_shape, "position:y", crouch_height * 0.5, crouch_transition_time)
+	else:
+		_crouch_tween.tween_property(head, "position:y", _base_head_pos.y, crouch_transition_time)
+		if shape:
+			_crouch_tween.parallel().tween_property(shape, "height", 1.8, crouch_transition_time)
+			_crouch_tween.parallel().tween_property(collision_shape, "position:y", 0.9, crouch_transition_time)
 
 func _reset_fire() -> void:
 	_can_fire = true
@@ -253,15 +289,16 @@ func _update_recoil(delta: float) -> void:
 		_recoil.y *= 0.9
 		_recoil.x *= 0.9
 
-func _update_bob(delta: float, input_dir: Vector2, speed: float) -> void:
+func _update_bob(delta: float, input_dir: Vector2, speed: float, sprinting: bool) -> void:
 	if not bob_enabled or _ads_active or _crouching:
 		_bob_time = 0.0
 		camera.position = camera.position.lerp(_base_cam_pos, 12.0 * delta)
 		return
 	var moving := is_on_floor() and input_dir != Vector2.ZERO
 	if moving:
+		var freq := bob_frequency * (sprint_bob_multiplier if sprinting else 1.0)
 		_bob_time += delta * (speed / walk_speed)
-		var phase := _bob_time * TAU * bob_frequency
+		var phase := _bob_time * TAU * freq
 		camera.position.y = lerpf(camera.position.y, _base_cam_pos.y + sin(phase) * bob_amplitude, 10.0 * delta)
 		camera.position.x = lerpf(camera.position.x, _base_cam_pos.x + cos(phase * 0.5) * bob_amplitude * 0.6, 10.0 * delta)
 	else:
