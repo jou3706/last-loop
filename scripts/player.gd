@@ -61,6 +61,8 @@ var _ads_active := false
 var _crouching := false
 var _was_sprinting := false
 var _was_crouching := false
+var _sprint_held := false
+var _crouch_held := false
 var _fov_target := 0.0
 var _fov_tween: Tween
 var _crouch_tween: Tween
@@ -80,9 +82,24 @@ func _ready() -> void:
 	_current_reserve = reserve_ammo
 	_align_muzzle_ray()
 	raycast.collision_mask = 1 | 4
+	_ensure_input_actions()
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	get_window().grab_focus()
 	print("[player] ready - script loaded, mouse captured")
+
+func _ensure_input_actions() -> void:
+	var sprint_key := InputEventKey.new()
+	sprint_key.physical_keycode = Key.KEY_SHIFT
+	if not InputMap.has_action("sprint"):
+		InputMap.add_action("sprint")
+	if not InputMap.action_has_event("sprint", sprint_key):
+		InputMap.action_add_event("sprint", sprint_key)
+	var crouch_key := InputEventKey.new()
+	crouch_key.physical_keycode = Key.KEY_CTRL
+	if not InputMap.has_action("crouch"):
+		InputMap.add_action("crouch")
+	if not InputMap.action_has_event("crouch", crouch_key):
+		InputMap.action_add_event("crouch", crouch_key)
 
 func _align_muzzle_ray() -> void:
 	var aim_point := camera.global_position - camera.global_transform.basis.z * ray_zero_parallax
@@ -92,6 +109,11 @@ func _notification(what: int) -> void:
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 func _input(event: InputEvent) -> void:
+	if event is InputEventKey and not event.echo:
+		if event.physical_keycode == Key.KEY_SHIFT:
+			_sprint_held = event.pressed
+		elif event.physical_keycode == Key.KEY_CTRL:
+			_crouch_held = event.pressed
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		var sens := ads_mouse_sensitivity if _ads_active else mouse_sensitivity
 		rotate_y(-event.relative.x * sens)
@@ -121,7 +143,7 @@ func _physics_process(delta: float) -> void:
 		velocity.y -= gravity * delta
 
 	var input_dir := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
-	var sprinting := not _crouching and Input.is_action_pressed("sprint") and input_dir != Vector2.ZERO
+	var sprinting := not _crouching and (_sprint_held or Input.is_physical_key_pressed(Key.KEY_SHIFT) or Input.is_action_pressed("sprint")) and input_dir != Vector2.ZERO
 	var base_speed := sprint_speed if sprinting else walk_speed
 	var speed := crouch_speed if _crouching else (ads_walk_speed if _ads_active else base_speed)
 	var direction := (transform.basis * Vector3(input_dir.x, 0.0, input_dir.y)).normalized()
@@ -199,7 +221,7 @@ func _set_fov_target(target: float) -> void:
 	_fov_tween.tween_property(camera, "fov", target, fov_transition_time)
 
 func _update_crouch() -> void:
-	var want_crouch := Input.is_action_pressed("crouch")
+	var want_crouch := _crouch_held or Input.is_physical_key_pressed(Key.KEY_CTRL) or Input.is_action_pressed("crouch")
 	if not want_crouch and not _can_stand():
 		want_crouch = true
 	var new_crouch := want_crouch and is_on_floor()
