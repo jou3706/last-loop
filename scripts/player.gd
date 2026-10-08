@@ -62,11 +62,15 @@ func _ready() -> void:
 	raycast.collision_mask = 1 | 4
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
-func _unhandled_input(event: InputEvent) -> void:
+func _input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		var sens := ads_mouse_sensitivity if _ads_active else mouse_sensitivity
 		rotate_y(-event.relative.x * sens)
 		head.rotation.x = clampf(head.rotation.x - event.relative.y * sens, min_pitch, max_pitch)
+	elif event is InputEventMouseButton and event.pressed and Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+
+func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("pause") or event.is_action_pressed("ui_cancel"):
 		if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
@@ -110,6 +114,8 @@ func _physics_process(delta: float) -> void:
 		_try_fire()
 
 func _try_fire() -> void:
+	if Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
+		return
 	if not _can_fire or _reloading:
 		return
 	if _current_mag <= 0:
