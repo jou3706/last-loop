@@ -7,6 +7,7 @@ extends CanvasLayer
 @onready var kills_label: Label = $Control/Kills
 @onready var status_label: Label = $Control/Status
 @onready var info_label: Label = $Control/Info
+@onready var objective_label: Label = $Control/Objective
 
 var _player: Node = null
 var _gm: Node = null
@@ -40,6 +41,9 @@ func _show_info(text: String) -> void:
 	_info_tween.tween_callback(func() -> void: info_label.visible = false)
 
 func _process(_delta: float) -> void:
+	var objective := ObjectiveManager.get_objective()
+	if objective_label.text != "Objective: " + objective:
+		objective_label.text = "Objective: " + objective
 	if _player != null:
 		if _player.has_method("get_ammo"):
 			var a = _player.get_ammo()
