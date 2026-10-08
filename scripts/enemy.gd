@@ -2,6 +2,7 @@ extends CharacterBody3D
 
 @export var speed := 2.8
 @export var health := 100
+@export var score_value := 10
 @export var attack_range := 1.6
 @export var attack_damage := 15
 @export var attack_cooldown := 1.0
@@ -14,7 +15,7 @@ var _target: Node3D = null
 var _can_attack := true
 var _player_ref: Node3D = null
 
-signal died
+signal died(score_value: int)
 
 func _ready() -> void:
 	nav.path_desired_distance = 0.5
@@ -27,6 +28,11 @@ func _find_player() -> void:
 
 func set_target(t: Node3D) -> void:
 	_target = t
+
+func setup_wave(wave: int) -> void:
+	if wave > 1:
+		health = int(health * (1.0 + 0.1 * float(wave - 1)))
+		speed = speed * (1.0 + 0.05 * float(wave - 1))
 
 func _physics_process(delta: float) -> void:
 	if not is_on_floor():
@@ -61,5 +67,5 @@ func _try_attack() -> void:
 func take_damage(amount: int) -> void:
 	health -= amount
 	if health <= 0:
-		died.emit()
+		died.emit(score_value)
 		queue_free()

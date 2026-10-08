@@ -2,11 +2,18 @@ extends Node
 
 @export var enemy_scene: PackedScene = preload("res://scenes/enemy.tscn")
 @export var spawn_points: Array[NodePath] = []
+@export var interwave_time := 2.0
 
 var _spawn_timer: Timer
 var _wave := 1
-var _enemies_left := 0
+var score := 0
+var kills := 0
+var _remaining_to_spawn := 0
+var _alive := 0
 var _spawn_nodes: Array[Marker3D] = []
+
+signal wave_started(wave: int)
+signal wave_cleared(wave: int)
 
 func _ready() -> void:
 	_collect_spawn_nodes()
@@ -16,7 +23,7 @@ func _ready() -> void:
 	add_child(_spawn_timer)
 	_spawn_timer.timeout.connect(_on_spawn)
 	_spawn_timer.start()
-	_spawn_wave()
+	call_deferred("_start_wave", 1)
 
 func _collect_spawn_nodes() -> void:
 	_spawn_nodes.clear()
@@ -36,27 +43,40 @@ func _collect_spawn_nodes() -> void:
 			if sp is Marker3D:
 				_spawn_nodes.append(sp)
 
-func _spawn_wave() -> void:
-	_enemies_left = _wave * 3
-	_spawn_timer.wait_time = max(1.5, 4.0 - _wave * 0.3)
+func _start_wave(w: int) -> void:
+	_wave = w
+	_remaining_to_spawn = _wave * 3
+	_alive = 0
+	_spawn_timer.wait_time = max(0.8, 3.0 - _wave * 0.2)
+	wave_started.emit(_wave)
 
 func _on_spawn() -> void:
-	if _enemies_left <= 0: return
+	if _remaining_to_spawn <= 0: return
 	if _spawn_nodes.is_empty(): _collect_spawn_nodes()
 	if _spawn_nodes.is_empty(): return
 	var sp: Marker3D = _spawn_nodes.pick_random()
 	var e = enemy_scene.instantiate()
 	get_tree().current_scene.add_child(e)
 	e.global_position = sp.global_position
+	e.setup_wave(_wave)
 	e.died.connect(_on_enemy_died)
-	_enemies_left -= 1
-	if _enemies_left <= 0:
-		_wave += 1
-		_spawn_wave()
+	_alive += 1
+	_remaining_to_spawn -= 1
 
-func _on_enemy_died() -> void:
-	pass
-
+func _on_enemy_died(points: int) -> void:
+	_alive = maxi(_alive - 1, 0)
+	kills += 1
+	score += points
+	if _alive == 0 and _remaining_to_spawn == 0:
+		wave_cleared.emit(_wave)
+		await get_tree().create_timer(interwave_time, false).timeout
+		_start_wave(_wave + 1)
 
 func get_wave() -> int:
 	return _wave
+
+func get_score() -> int:
+	return score
+
+func get_kills() -> int:
+	return kills
