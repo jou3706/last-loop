@@ -61,6 +61,11 @@ func _ready() -> void:
 	raycast.target_position = Vector3(0, 0, -range)
 	raycast.collision_mask = 1 | 4
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	get_window().grab_focus()
+	print("[player] ready - script loaded, mouse captured")
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_APPLICATION_FOCUS_IN or what == NOTIFICATION_WM_WINDOW_FOCUS_IN:
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
