@@ -1,5 +1,7 @@
 extends Area3D
 
+signal triggered(body: Node3D)
+
 @export var objective_text := ""
 @export var enemy_group: PackedScene
 @export var spawn_offset := Vector3.ZERO
@@ -25,6 +27,7 @@ func _on_body_entered(body: Node3D) -> void:
 		_used = true
 	if complete_level:
 		_complete_level()
+	triggered.emit(body)
 
 func _spawn_group() -> void:
 	var group := enemy_group.instantiate()

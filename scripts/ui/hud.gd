@@ -24,6 +24,13 @@ func _bind() -> void:
 		if _gm.has_signal("wave_started"):
 			_gm.wave_started.connect(_on_wave_started)
 			_gm.wave_cleared.connect(_on_wave_cleared)
+		wave_label.visible = true
+		score_label.visible = true
+		kills_label.visible = true
+	else:
+		wave_label.visible = false
+		score_label.visible = false
+		kills_label.visible = false
 
 func _on_wave_started(wave: int) -> void:
 	_show_info("Wave %d" % wave)
