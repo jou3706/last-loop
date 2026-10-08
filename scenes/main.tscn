@@ -1,8 +1,9 @@
-[gd_scene format=3 uid="uid://b3l03l81td5g2"]
+[gd_scene load_steps=13 format=3 uid="uid://b3l03l81td5g2"]
 
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/game_manager.tscn" id="game_mgr"]
 [ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="hud"]
+[ext_resource type="PackedScene" path="res://scenes/target.tscn" id="target"]
 
 [sub_resource type="ProceduralSkyMaterial" id="SkyMaterial_1"]
 sky_top_color = Color(0.25, 0.4, 0.6, 1)
@@ -89,3 +90,19 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0, -10)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -12)
 
 [node name="HUD" parent="." unique_id=978631508 instance=ExtResource("hud")]
+
+[node name="Target1" parent="." instance=ExtResource("target")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0, -14)
+
+[node name="Target2" parent="." instance=ExtResource("target")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, -14)
+
+[node name="TargetMove1" parent="." instance=ExtResource("target")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -17)
+move_range = 2.5
+move_duration = 1.4
+
+[node name="TargetMove2" parent="." instance=ExtResource("target")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, -17)
+move_range = 2.0
+move_duration = 2.0
