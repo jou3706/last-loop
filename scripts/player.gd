@@ -28,10 +28,14 @@ extends CharacterBody3D
 @export var crouch_height := 1.0
 @export var crouch_transition_speed := 10.0
 
+@export_category("Sprint FOV")
+@export var sprint_fov := 100.0
+
 @export_category("Weapon")
 @export var fire_rate := 8.0  # RPS
 @export var damage := 24
 @export var range := 200.0
+@export var ray_zero_parallax := 20.0
 @export var mag_size := 30
 @export var reserve_ammo := 90
 @export var reload_time := 1.6
@@ -42,9 +46,10 @@ extends CharacterBody3D
 @onready var head: Node3D = $Head
 @onready var camera: Camera3D = $Head/Camera3D
 @onready var weapon_holder: Node3D = $Head/Camera3D/WeaponHolder
-@onready var raycast: RayCast3D = $Head/Camera3D/RayCast3D
-@onready var muzzle_flash: GPUParticles3D = $Head/Camera3D/WeaponHolder/MuzzleFlash
-@onready var muzzle_light: OmniLight3D = $Head/Camera3D/WeaponHolder/MuzzleLight
+@onready var muzzle: Marker3D = $Head/Camera3D/WeaponHolder/Muzzle
+@onready var raycast: RayCast3D = $Head/Camera3D/WeaponHolder/Muzzle/RayCast3D
+@onready var muzzle_flash: GPUParticles3D = $Head/Camera3D/WeaponHolder/Muzzle/MuzzleFlash
+@onready var muzzle_light: OmniLight3D = $Head/Camera3D/WeaponHolder/Muzzle/MuzzleLight
 @onready var collision_shape: CollisionShape3D = $CollisionShape3D
 
 const ImpactScene := preload("res://scenes/fx/impact.tscn")
@@ -67,11 +72,15 @@ func _ready() -> void:
 	camera.fov = hip_fov
 	_current_mag = mag_size
 	_current_reserve = reserve_ammo
-	raycast.target_position = Vector3(0, 0, -range)
+	_align_muzzle_ray()
 	raycast.collision_mask = 1 | 4
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	get_window().grab_focus()
 	print("[player] ready - script loaded, mouse captured")
+
+func _align_muzzle_ray() -> void:
+	var aim_point := camera.global_position - camera.global_transform.basis.z * ray_zero_parallax
+	raycast.target_position = raycast.to_local(aim_point).normalized() * range
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_FOCUS_IN or what == NOTIFICATION_WM_WINDOW_FOCUS_IN:
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
@@ -105,9 +114,10 @@ func _physics_process(delta: float) -> void:
 	else:
 		velocity.y -= gravity * delta
 
-	var base_speed := sprint_speed if Input.is_action_pressed("sprint") and not _crouching else walk_speed
-	var speed := crouch_speed if _crouching else (ads_walk_speed if _ads_active else base_speed)
 	var input_dir := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
+	var sprinting := not _crouching and Input.is_action_pressed("sprint") and input_dir != Vector2.ZERO
+	var base_speed := sprint_speed if sprinting else walk_speed
+	var speed := crouch_speed if _crouching else (ads_walk_speed if _ads_active else base_speed)
 	var direction := (transform.basis * Vector3(input_dir.x, 0.0, input_dir.y)).normalized()
 
 	if direction:
@@ -119,7 +129,7 @@ func _physics_process(delta: float) -> void:
 
 	move_and_slide()
 
-	var target_fov := ads_fov if _ads_active else hip_fov
+	var target_fov := ads_fov if _ads_active else (sprint_fov if sprinting else hip_fov)
 	camera.fov = lerpf(camera.fov, target_fov, ads_transition_speed * delta)
 
 	_update_bob(delta, input_dir, speed)
@@ -141,7 +151,7 @@ func _try_fire() -> void:
 
 func _fire() -> void:
 	_current_mag -= 1
-	var start := muzzle_flash.global_position
+	var start := muzzle.global_position
 	var end := raycast.to_global(raycast.target_position)
 	if raycast and raycast.is_colliding():
 		end = raycast.get_collision_point()
@@ -160,8 +170,16 @@ func _fire() -> void:
 	_can_fire = false
 	get_tree().create_timer(1.0 / max(fire_rate, 0.01), false).timeout.connect(_reset_fire, CONNECT_ONE_SHOT)
 
+func _can_stand() -> bool:
+	var space := get_world_3d().direct_space_state
+	var q := PhysicsRayQueryParameters3D.create(head.global_position, head.global_position + Vector3.UP * 1.2, 1)
+	return space.intersect_ray(q).is_empty()
+
 func _update_crouch(delta: float) -> void:
-	_crouching = Input.is_action_pressed("crouch") and is_on_floor()
+	var want_crouch := Input.is_action_pressed("crouch")
+	if not want_crouch and not _can_stand():
+		want_crouch = true
+	_crouching = want_crouch and is_on_floor()
 	var ratio := crouch_height / 1.8
 	var target_head_y := _base_head_pos.y * ratio if _crouching else _base_head_pos.y
 	head.position.y = lerpf(head.position.y, target_head_y, crouch_transition_speed * delta)

@@ -53,8 +53,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, -0.16, -0.55)
 material_override = SubResource("MatWeapon")
 mesh = ExtResource("2")
 
-[node name="MuzzleFlash" type="GPUParticles3D" parent="Head/Camera3D/WeaponHolder"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.18, -0.62)
+[node name="Muzzle" type="Marker3D" parent="Head/Camera3D/WeaponHolder"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.6)
+
+[node name="MuzzleFlash" type="GPUParticles3D" parent="Head/Camera3D/WeaponHolder/Muzzle"]
 amount = 6
 one_shot = true
 explosiveness = 1.0
@@ -63,12 +65,11 @@ visibility_aabb = AABB(-1, -1, -1, 2, 2, 2)
 process_material = SubResource("PPM_muzzle")
 draw_pass_1 = SubResource("Quad_flash")
 
-[node name="MuzzleLight" type="OmniLight3D" parent="Head/Camera3D/WeaponHolder"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.18, -0.62)
+[node name="MuzzleLight" type="OmniLight3D" parent="Head/Camera3D/WeaponHolder/Muzzle"]
 light_color = Color(1, 0.7, 0.3, 1)
 light_energy = 0.0
 omni_range = 4.0
 
-[node name="RayCast3D" type="RayCast3D" parent="Head/Camera3D"]
+[node name="RayCast3D" type="RayCast3D" parent="Head/Camera3D/WeaponHolder/Muzzle"]
 target_position = Vector3(0, 0, -200)
 collision_mask = 5
