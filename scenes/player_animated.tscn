@@ -1,4 +1,4 @@
-[gd_scene format=4]
+﻿[gd_scene format=4]
 
 [ext_resource type="Script" path="res://scripts/player_animated.gd" id="1_okebs"]
 [ext_resource type="ArrayMesh" path="res://assets/models/weapons/rifle.obj" id="2_7fmbd"]
@@ -16556,6 +16556,7 @@ bones/64/rotation = Quaternion(0, -0.011869166, 0, 0.99992955)
 bones/64/scale = Vector3(1, 1, 1)
 
 [node name="Beta_Surface" type="MeshInstance3D" parent="Skeleton3D" unique_id=1575217273]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0, 0)
 mesh = SubResource("ArrayMesh_xubxo")
 skin = SubResource("Skin_ppe7q")
 
@@ -16564,6 +16565,7 @@ visible = false
 mesh = SubResource("ArrayMesh_waa17")
 skin = SubResource("Skin_y4ypw")
 
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0, 0)
 [node name="RifleAttach" type="BoneAttachment3D" parent="Skeleton3D" unique_id=1656153206]
 transform = Transform3D(-1.3415654e-07, -1, -5.1781535e-07, -3.8556868e-07, 5.5879354e-07, -0.99999994, 1.0000001, -8.476812e-08, -3.97191e-07, -0.71333164, 1.4406133, -0.05548467)
 bone_name = "mixamorig_RightHand"
