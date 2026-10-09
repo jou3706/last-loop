@@ -1,4 +1,4 @@
-extends CharacterBody3D
+﻿extends CharacterBody3D
 
 ## Player animated rig controller (AnimationPlayer-driven).
 ## Third-person character with a procedural skeleton (Mixamo clips):
@@ -90,20 +90,18 @@ func _physics_process(delta: float) -> void:
 	if input_dir != Vector2.ZERO:
 		desired = (fwd * -input_dir.y + right * input_dir.x).normalized()
 
-	var top_speed := walk_speed
-	if _crouching:
-		top_speed = crouch_speed
-	elif sprinting:
-		top_speed = run_speed
-	elif _aiming:
-		top_speed = walk_speed * aim_speed_factor
-
+	var top_speed := 0.0
+	if not input_dir.is_zero_approx():
+		if sprinting: top_speed = run_speed
+		else: top_speed = walk_speed
+	else:
+		top_speed = 0.0
+	if _crouching and top_speed > 0.0: top_speed = crouch_speed
+	elif _aiming and top_speed > 0.0: top_speed = walk_speed * aim_speed_factor
 	var target_vel := desired * top_speed
 	var rate := accel if desired != Vector3.ZERO else decel
 	velocity.x = move_toward(velocity.x, target_vel.x, rate * delta)
 	velocity.z = move_toward(velocity.z, target_vel.z, rate * delta)
-
-	move_and_slide()
 
 	# Face the actual movement direction so the character turns towards where it
 	# is being driven by WASD (smoothly, via turn_speed).
@@ -157,16 +155,12 @@ func _target_clip(dir_deg: float, speed: float) -> StringName:
 		if absf(dir_deg) <= 45.0 or absf(dir_deg) > 135.0:
 			return C_CROUCH_F
 		return C_CROUCH_R if dir_deg > 0.0 else C_CROUCH_L
-	if _aiming:
-		if speed < 0.35:
-			return C_IDLE_AIM
-	elif speed < 0.35:
+
+	if _aiming and speed < 0.35:
+		return C_IDLE_AIM
+	elif input_dir.is_zero_approx() or speed < 0.25:
 		return C_IDLE
-	var running := speed > walk_speed * 0.85
-	if dir_deg < -45.0:
-		if absf(dir_deg) <= 90.0:
-			return C_RUN_F if running else C_WALK_FL
-		return C_RUN_B if running else C_WALK_B
+	var running := sprinting
 	if dir_deg <= 45.0:
 		return C_RUN_F if running else C_WALK_F
 	if dir_deg <= 90.0:
