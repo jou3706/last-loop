@@ -82,8 +82,11 @@ var _iframes_left := 0.0
 var _start_global := Vector3.ZERO
 var _respawn_timer: Timer
 var _last_bob_sin := 0.0
+var health := 0
 
 func _ready() -> void:
+	floor_snap_length = 0.2
+	up_direction = Vector3.UP
 	_base_cam_pos = camera.position
 	_base_head_pos = head.position
 	camera.fov = hip_fov
@@ -120,6 +123,7 @@ func _ensure_input_actions() -> void:
 func _align_muzzle_ray() -> void:
 	var aim_point := camera.global_position - camera.global_transform.basis.z * ray_zero_parallax
 	raycast.target_position = raycast.to_local(aim_point).normalized() * range
+
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_FOCUS_IN or what == NOTIFICATION_WM_WINDOW_FOCUS_IN:
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
@@ -138,11 +142,6 @@ func _input(event: InputEvent) -> void:
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("pause") or event.is_action_pressed("ui_cancel"):
-		if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-		else:
-			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	if event.is_action_pressed("aim"):
 		_ads_active = true
 	if event.is_action_released("aim"):
@@ -359,9 +358,6 @@ func _update_bob(delta: float, input_dir: Vector2, speed: float, sprinting: bool
 		_bob_time = 0.0
 		_last_bob_sin = 0.0
 		camera.position = camera.position.lerp(_base_cam_pos, 10.0 * delta)
-
-
-var health: int
 
 func take_damage(amount: int) -> void:
 	if _dead or _iframes_left > 0.0:

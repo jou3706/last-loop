@@ -17,11 +17,13 @@ func _ready() -> void:
 	call_deferred("_bind")
 
 func _bind() -> void:
-	var root = get_tree().current_scene
+	var root := get_tree().current_scene
+	if root == null:
+		return
 	_player = root.get_node_or_null("Player")
 	_gm = root.get_node_or_null("GameManager")
 	if _gm != null:
-		if _gm.has_signal("wave_started"):
+		if _gm.has_signal("wave_started") and not _gm.wave_started.is_connected(_on_wave_started):
 			_gm.wave_started.connect(_on_wave_started)
 			_gm.wave_cleared.connect(_on_wave_cleared)
 		wave_label.visible = true
@@ -48,6 +50,8 @@ func _show_info(text: String) -> void:
 	_info_tween.tween_callback(func() -> void: info_label.visible = false)
 
 func _process(_delta: float) -> void:
+	if _player == null:
+		_bind()
 	var objective := ObjectiveManager.get_objective()
 	if objective_label.text != "Objective: " + objective:
 		objective_label.text = "Objective: " + objective

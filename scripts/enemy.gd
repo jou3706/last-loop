@@ -27,7 +27,9 @@ func _ready() -> void:
 	call_deferred("_find_player")
 
 func _find_player() -> void:
-	var root = get_tree().current_scene
+	var root := get_tree().current_scene
+	if root == null:
+		return
 	_player_ref = root.get_node_or_null("Player")
 
 func set_target(t: Node3D) -> void:

@@ -16090,8 +16090,9 @@ states/Rifle_Jump/position = Vector2(0, 0)
 transitions = ["Locomotion", "Rifle_Jump", SubResource("AnimationNodeStateMachineTransition_qo7y0"), "Rifle_Jump", "Locomotion", SubResource("AnimationNodeStateMachineTransition_yt7td"), "Start", "Locomotion", SubResource("AnimationNodeStateMachineTransition_okebs"), "Locomotion", "Aiming", SubResource("AnimationNodeStateMachineTransition_hx5p1"), "Aiming", "Locomotion", SubResource("AnimationNodeStateMachineTransition_m1ybh"), "Locomotion", "Crouching", SubResource("AnimationNodeStateMachineTransition_pnmxa"), "Crouching", "Locomotion", SubResource("AnimationNodeStateMachineTransition_t1wjy"), "Aiming", "Crouching", SubResource("AnimationNodeStateMachineTransition_r6wn1"), "Crouching", "Aiming", SubResource("AnimationNodeStateMachineTransition_oe21m"), "Locomotion", "Fire", SubResource("AnimationNodeStateMachineTransition_84dql"), "Aiming", "Fire", SubResource("AnimationNodeStateMachineTransition_xppbs"), "Crouching", "Fire", SubResource("AnimationNodeStateMachineTransition_idf2x"), "Fire", "Locomotion", SubResource("AnimationNodeStateMachineTransition_aels0"), "Locomotion", "Reload", SubResource("AnimationNodeStateMachineTransition_1hkje"), "Aiming", "Reload", SubResource("AnimationNodeStateMachineTransition_g00g1"), "Crouching", "Reload", SubResource("AnimationNodeStateMachineTransition_hkh8f"), "Reload", "Locomotion", SubResource("AnimationNodeStateMachineTransition_dhhj2"), "Aiming", "Rifle_Jump", SubResource("AnimationNodeStateMachineTransition_myjfa"), "Crouching", "Rifle_Jump", SubResource("AnimationNodeStateMachineTransition_l8lb0")]
 
 [node name="Player" type="CharacterBody3D" unique_id=88838857]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.95000005, 0)
-velocity = Vector3(0, -6.0000005, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+collision_layer = 2
+collision_mask = 1
 script = ExtResource("1_okebs")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1004098478]
@@ -16593,10 +16594,13 @@ parameters/Reload/Shot/internal_active = false
 parameters/Reload/Shot/request = 0
 
 [node name="SpringArm3D" type="SpringArm3D" parent="." unique_id=361618113]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
-spring_length = 4.0
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.45, 1.55, 0)
+spring_length = 2.7
+collision_mask = 1
+margin = 0.2
 
 [node name="Camera3D" type="Camera3D" parent="SpringArm3D" unique_id=2068305917]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 4)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 current = true
+fov = 70.0
 near = 0.1

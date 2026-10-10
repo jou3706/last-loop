@@ -11,6 +11,7 @@ var kills := 0
 var _remaining_to_spawn := 0
 var _alive := 0
 var _spawn_nodes: Array[Marker3D] = []
+var _advancing := false
 
 signal wave_started(wave: int)
 signal wave_cleared(wave: int)
@@ -47,6 +48,7 @@ func _start_wave(w: int) -> void:
 	_wave = w
 	_remaining_to_spawn = _wave * 3
 	_alive = 0
+	_advancing = false
 	_spawn_timer.wait_time = max(0.8, 3.0 - _wave * 0.2)
 	wave_started.emit(_wave)
 
@@ -67,9 +69,12 @@ func _on_enemy_died(points: int) -> void:
 	_alive = maxi(_alive - 1, 0)
 	kills += 1
 	score += points
-	if _alive == 0 and _remaining_to_spawn == 0:
-		wave_cleared.emit(_wave)
-		await get_tree().create_timer(interwave_time, false).timeout
+	if _alive != 0 or _remaining_to_spawn != 0 or _advancing:
+		return
+	_advancing = true
+	wave_cleared.emit(_wave)
+	await get_tree().create_timer(interwave_time, false).timeout
+	if is_inside_tree():
 		_start_wave(_wave + 1)
 
 func get_wave() -> int:

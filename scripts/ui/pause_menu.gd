@@ -21,11 +21,13 @@ func toggle() -> void:
 func pause() -> void:
 	get_tree().paused = true
 	visible = true
+	$Panel.visible = true
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 func resume() -> void:
 	get_tree().paused = false
 	visible = false
+	$Panel.visible = false
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 func _on_resume() -> void:
